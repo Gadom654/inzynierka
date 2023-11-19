@@ -1,0 +1,43 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "eu-central-1",
+    "source_ami": "ami-0a485299eeb98b979",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ami_name": "app-ami-{{timestamp}}"
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum update -y",
+        "sudo yum install -y httpd pip git httpd-devel python3-devel",
+	"sudo ln -s /usr/bin/python3 /usr/bin/python"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./stock_app",
+      "destination": "/tmp/stock_app"
+    },
+    {
+      "type": "file",
+      "source": "./flask.conf",
+      "destination": "/tmp/flask.conf"
+    },
+    {
+      "type": "shell",
+      "inline": [
+	"sudo mv /tmp/flask.conf /etc/httpd/conf.d/flask.conf",
+  	"sudo mv /tmp/stock_app /stock_app",	
+	"python -m venv /stock_app/flask",
+	"source /stock_app/flask/bin/activate",
+	"pip install -r /stock_app/requirements.txt",
+	"sudo /stock_app/flask/bin/mod_wsgi-express module-config >> /etc/httpd/conf/httpd.conf",
+        "sudo systemctl enable httpd"
+      ]
+    }
+  ]
+}
+

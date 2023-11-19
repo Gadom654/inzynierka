@@ -5,7 +5,7 @@
 resource "aws_key_pair" "testtin" {
   key_name        = "flaskin"
   key_name_prefix = null
-  public_key      = file("${path.module}/aws_inz.pub")
+  public_key      = file("~/.ssh/aws_inz.pub")
   tags            = {}
   tags_all        = {}
 }

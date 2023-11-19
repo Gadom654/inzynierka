@@ -1,5 +1,46 @@
+resource "aws_iam_policy" "dynamodb_policy" {
+  name        = "DynamoDBFullAccessPolicy"
+  description = "Policy to grant full access to DynamoDB"
 
-# __generated__ by Terraform
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "dynamodb:*",
+        Effect   = "Allow",
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role" "ec2_dynamodb_role" {
+  name = "ec2_dynamodb_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_dynamodb" {
+  role       = aws_iam_role.ec2_dynamodb_role.name
+  policy_arn = aws_iam_policy.dynamodb_policy.arn
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_dynamodb_profile"
+  role = aws_iam_role.ec2_dynamodb_role.name
+}
+
 resource "aws_instance" "test_terraform" {
   ami                                  = "ami-0a485299eeb98b979"
   associate_public_ip_address          = true
@@ -11,7 +52,7 @@ resource "aws_instance" "test_terraform" {
   hibernation                          = false
   host_id                              = null
   host_resource_group_arn              = null
-  iam_instance_profile                 = null
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
   instance_initiated_shutdown_behavior = "stop"
   instance_type                        = "t2.micro"
   key_name                             = "flaskin"
@@ -29,9 +70,6 @@ resource "aws_instance" "test_terraform" {
     Name = "FlaskApp"
   }
   tenancy                     = "default"
-  user_data                   = null
-  user_data_base64            = null
-  user_data_replace_on_change = null
   volume_tags                 = null
   vpc_security_group_ids      = ["sg-0d66a533b925c44f5"]
   capacity_reservation_specification {
@@ -68,4 +106,19 @@ resource "aws_instance" "test_terraform" {
     volume_size           = 8
     volume_type           = "gp3"
   }
+    user_data = <<-EOF
+#!/bin/bash
+sudo yum install -y httpd pip git httpd-devel python3-devel
+cd /tmp
+git clone https://github.com/Gadom654/inzynierka
+mv /tmp/inzynierka/stock_app /stock_app
+sudo mv /tmp/inzynierka/flask.conf /etc/httpd/conf.d/flask.conf
+cd /stock_app
+ln -s /usr/bin/python3 /usr/bin/python
+python -m venv flask
+source flask/bin/activate
+pip install -r requirements.txt
+sudo /stock_app/flask/bin/mod_wsgi-express module-config >> /etc/httpd/conf/httpd.conf
+sudo systemctl start httpd
+EOF
 }
