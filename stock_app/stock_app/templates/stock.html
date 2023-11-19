@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+        /* Style for the chart container */
+        #chartContainer {
+            max-height: 50%;
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>{{ stock.name }} ({{ stock.symbol }}) - Stock Details</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <td>{{ stock.name }}</td>
+        </tr>
+        <tr>
+            <th>Symbol</th>
+            <td>{{ stock.symbol }}</td>
+        </tr>
+        <tr>
+            <th>Current Price</th>
+            <td>${{ stock.last_close_price }}</td>
+        </tr>
+        <tr>
+            <th>P/E Ratio</th>
+            <td>{{ stock.pe_ratio }}</td>
+        </tr>
+        <tr>
+            <th>Market Cap</th>
+            <td>{{ stock.market_cap }}</td>
+        </tr>
+    </table>
+
+    <!-- Large chart -->
+    <canvas id="largeChart" width="600" height="300"></canvas>
+
+    <!-- Small chart -->
+    <canvas id="smallChart" width="300" height="150"></canvas>
+
+
+    <!-- Single chart container with dynamic height -->
+    <div id="chartContainer">
+        <canvas id="stockChart" width="600" height="300"></canvas>
+    </div>
+
+    <script>
+        // JavaScript code to create the chart using the provided chart_data
+        var ctx = document.getElementById('stockChart').getContext('2d');
+        var chartData = {{ chart_data|tojson|safe }};
+
+        if (chartData.length > 0) {
+            // Create the chart only if chartData is not empty
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(item => item.date),
+                    datasets: [{
+                        label: 'Close Price',
+                        data: chartData.map(item => item.close_price),
+                        borderColor: 'blue',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date',
+                            },
+                        }],
+                        y: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Close Price',
+                            },
+                        }],
+                    },
+                },
+            });
+        }
+    </script>
+{% endblock %}
+</body>
+</html>

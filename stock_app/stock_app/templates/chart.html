@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Chart - {{ symbol }}</title>
+    <!-- Include necessary JavaScript libraries for charting -->
+    <!-- Example: Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    {% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+    {% block content %}
+    <h1>Stock Chart - {{ symbol }}</h1>
+    <canvas id="stockChart" width="400" height="200"></canvas>
+
+    <script>
+        // JavaScript code to create the chart using the provided chart_data
+        var ctx = document.getElementById('stockChart').getContext('2d');
+        var chartData = {{ chart_data|tojson|safe }};
+
+        // Example: Create a line chart using Chart.js
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.map(item => item.date),
+                datasets: [{
+                    label: 'Close Price',
+                    data: chartData.map(item => item.close_price),
+                    borderColor: 'blue',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                scales: {
+                    x: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date',
+                        },
+                    }],
+                    y: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Close Price',
+                        },
+                    }],
+                },
+            },
+        });
+    </script>
+{% endblock %}
+</body>
+</html>

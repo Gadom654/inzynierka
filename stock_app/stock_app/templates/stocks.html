@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Stocks</h1>
+    <ul>
+        {% for symbol in symbols %}
+            <li>
+                {{ symbol }} -
+                {% if symbol in last_closing_prices %}
+                    Last Closing Price: ${{ last_closing_prices[symbol] }}
+                {% else %}
+                    Data not available
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+</body>
+</html>
