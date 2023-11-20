@@ -1,0 +1,100 @@
+version: 2.1
+
+jobs:
+  plan-apply:
+    working_directory: /tmp/project
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: Terraform Init and Plan
+          command: |
+            terraform init -input=false
+            terraform plan -out tfapply
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  apply:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Apply
+          command: |
+            terraform apply -auto-approve tfapply
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  plan-destroy:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Create Destroy Plan
+          command: |
+            terraform plan -destroy -out tfdestroy
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  destroy:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Destroy
+          command: |
+            terraform apply -auto-approve tfdestroy
+
+workflows:
+  version: 2
+  plan_approve_apply:
+    jobs:
+      - plan-apply:
+          filters:
+            branches:
+              only: main
+      - hold-apply:
+          type: approval
+          requires:
+            - plan-apply
+          filters:
+            branches:
+              only: main
+      - apply:
+          requires:
+            - hold-apply
+          filters:
+            branches:
+              only: main
+      - plan-destroy:
+          requires:
+            - apply
+          filters:
+            branches:
+              only: main
+      - hold-destroy:
+          type: approval
+          requires:
+            - plan-destroy
+          filters:
+            branches:
+              only: main
+      - destroy:
+          requires:
+            - hold-destroy
+          filters:
+            branches:
+              only: main
