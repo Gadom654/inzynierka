@@ -118,7 +118,6 @@ ln -s /usr/bin/python3 /usr/bin/python
 python -m venv flask
 source flask/bin/activate
 pip install -r requirements.txt
-sudo /stock_app/flask/bin/mod_wsgi-express module-config >> /etc/httpd/conf/httpd.conf
 sudo systemctl start httpd
 EOF
 }
