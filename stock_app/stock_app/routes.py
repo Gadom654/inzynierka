@@ -2,6 +2,7 @@ from stock_app import db, data_fetcher  # Import app, db, and data_fetcher from 
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 import yfinance as yf
 from datetime import datetime, timedelta
+from flask import jsonify, render_template, request, redirect, url_for
 
 # Get the end date and time for data fetching
 end_date = datetime.now()
@@ -34,7 +35,6 @@ def index():
     except Exception as e:
         return jsonify({"message": f"Error: {str(e)}"}), 500
 
-from flask import jsonify, render_template, request, redirect, url_for
 
 @routes_bp.route('/search', methods=['GET'])
 def search():
@@ -142,6 +142,10 @@ def display_chart(symbol):
 
 
 @routes_bp.route('/stock/<symbol>')
+def stock_detail():
+    return render_template('test.html')
+
+@routes_bp.route('/stock/<symbol>')
 def stock_detail(symbol):
     try:
         # Fetch data for the specific stock from the DynamoDB table
@@ -172,7 +176,6 @@ def stock_detail(symbol):
 #            return jsonify({"message": "Stock not found."}), 404
 #    except Exception as e:
 #        return jsonify({"message": f"Error: {str(e)}"}), 500
-
 
 @routes_bp.route('/fetch_stock_data/<symbol>')
 def fetch_and_store_stock_data(symbol):

@@ -34,9 +34,15 @@
 	"python -m venv /stock_app/flask",
 	"source /stock_app/flask/bin/activate",
 	"pip install -r /stock_app/requirements.txt",
-	"sudo /stock_app/flask/bin/mod_wsgi-express module-config >> /etc/httpd/conf/httpd.conf",
         "sudo systemctl enable httpd"
       ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
     }
   ]
 }

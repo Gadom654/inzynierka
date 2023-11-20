@@ -6,3 +6,4 @@
 *.tfstate
 *.tfstate.*
 *.terraform.*
+*.manifest.json
