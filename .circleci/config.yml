@@ -2,6 +2,7 @@ version: 2.1
 
 jobs:
   apply:
+    working_directory: /tmp/project
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
@@ -70,7 +71,7 @@ jobs:
 
 workflow:
   version: 2
-  plan_approve_apply:
+  plan_blue_green_strategy:
     jobs:
       - apply:
           filters:
