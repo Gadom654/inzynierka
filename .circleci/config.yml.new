@@ -1,100 +1,95 @@
 version: 2.1
 
 jobs:
-  plan-apply:
+  apply:
     working_directory: /tmp/project
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - checkout
       - run:
-          name: Terraform Init and Plan
+          name: Terraform Apply Green ec2 and switch traffic
           command: |
             terraform init -input=false
-            terraform plan -out tfapply
+            packer build app-ami.json
+            source parsing.sh
+            terraform apply -auto-approve
       - persist_to_workspace:
           root: .
           paths:
             - .
 
-  apply:
+  test:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: Terraform Apply
+          name: test traffic
           command: |
-            terraform apply -auto-approve tfapply
+            curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test
       - persist_to_workspace:
           root: .
           paths:
             - .
-
-  plan-destroy:
+  
+  switch:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: Terraform Create Destroy Plan
+          name: update blue ami
           command: |
-            terraform plan -destroy -out tfdestroy
+            export TF_VAR_old_blue_ami_id="$TF_VAR_blue_ami_id"
+            export TF_VAR_blue_ami_id="$TF_VAR_green_ami_id"
+            export TF_VAR_active_deployment="blue"
+            terraform apply -auto-approve
       - persist_to_workspace:
           root: .
           paths:
             - .
-
-  destroy:
+              
+  remove:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: Terraform Destroy
+          name: remove green ami 
           command: |
-            terraform apply -auto-approve tfdestroy
+            export TF_VAR_is_green_active=false
+            terraform apply -auto-approve
+            aws ec2 deregister-image --image-id $TF_VAR_old_blue_ami_id
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
-workflows:
+workflow:
   version: 2
-  plan_approve_apply:
+  plan_blue_green_strategy:
     jobs:
-      - plan-apply:
-          filters:
-            branches:
-              only: main
-      - hold-apply:
-          type: approval
-          requires:
-            - plan-apply
-          filters:
-            branches:
-              only: main
       - apply:
-          requires:
-            - hold-apply
           filters:
             branches:
               only: main
-      - plan-destroy:
-          requires:
-            - apply
+      - test:
           filters:
             branches:
               only: main
-      - hold-destroy:
-          type: approval
-          requires:
-            - plan-destroy
+      - switch:
           filters:
             branches:
               only: main
-      - destroy:
-          requires:
-            - hold-destroy
+      - test:
+          filters:
+            branches:
+              only: main
+      - remove:
           filters:
             branches:
               only: main
