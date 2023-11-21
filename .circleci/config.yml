@@ -63,6 +63,7 @@ jobs:
             export TF_VAR_old_blue_ami_id="$TF_VAR_blue_ami_id"
             export TF_VAR_blue_ami_id="$TF_VAR_green_ami_id"
             export TF_VAR_active_deployment="blue"
+            terraform init
             terraform apply -auto-approve
       - persist_to_workspace:
           root: .
@@ -79,6 +80,7 @@ jobs:
           name: remove green ami
           command: |
             export TF_VAR_is_green_active=false
+            terraform init
             terraform apply -auto-approve
             aws ec2 deregister-image --image-id $TF_VAR_old_blue_ami_id
 
