@@ -4,17 +4,17 @@ jobs:
   apply:
     working_directory: /tmp/project
     docker:
-      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+      - image: cimg/base:2023.11
     steps:
       - checkout
       - run:
           name: Terraform Apply Green ec2 and switch traffic
           command: |
-            apt-get install gpg
+            sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
             terraform init -input=false
-            wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-            apt-get install packer
+            wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+            sudo apt install packer
             packer build app-ami.json
             source parsing.sh
             terraform apply -auto-approve
