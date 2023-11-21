@@ -62,7 +62,7 @@ jobs:
           command: |
             sed -i 's/blue_ami_id/old_blue_ami_id/g' terraform.auto.tfvars
             sed -i 's/green_ami_id/blue_ami_id/g' filename
-            echo "active_deployment="blue"" >> terraform.auto.tfvars
+            echo "active_deployment=\"blue\"" >> terraform.auto.tfvars
             terraform init
             terraform apply -auto-approve
       - persist_to_workspace:
