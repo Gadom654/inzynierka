@@ -16,6 +16,6 @@ resource "aws_elb" "example" {
     target              = "HTTP:80/"
     interval            = 30
   }
-  instances = var.is_green_active ? [aws_instance.green[0].id] : [aws_instance.blue[0].id]
+  instances = var.active_deployment == "green" ? [aws_instance.green.id] : [aws_instance.blue.id]
 }
 

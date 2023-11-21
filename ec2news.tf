@@ -10,23 +10,6 @@ resource "aws_key_pair" "testtin" {
   tags_all        = {}
 }
 
-# __generated__ by Terraform from "vol-0cab6c20bc07f03a8"
-resource "aws_ebs_volume" "testti" {
-  availability_zone    = "eu-central-1a"
-  encrypted            = false
-  final_snapshot       = null
-  iops                 = 3000
-  kms_key_id           = null
-  multi_attach_enabled = false
-  outpost_arn          = null
-  size                 = 8
-  snapshot_id          = "snap-084fa3aecdad5091f"
-  tags                 = {}
-  tags_all             = {}
-  throughput           = 125
-  type                 = "gp3"
-}
-
 # __generated__ by Terraform from "sg-0d66a533b925c44f5"
 resource "aws_security_group" "testt" {
   description = "launch-wizard-1 created 2023-11-13T13:20:11.265Z"

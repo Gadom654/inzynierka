@@ -52,7 +52,7 @@ variable "blue_ami_id" {
 }
 
 resource "aws_instance" "green" {
-  count = var.is_green_active ? 1 : 1
+  count = var.is_green_active ? 1 : 0
   ami                                  = var.green_ami_id
   associate_public_ip_address          = true
   availability_zone                    = "eu-central-1a"
@@ -119,7 +119,7 @@ resource "aws_instance" "green" {
 }
 
 resource "aws_instance" "blue" {
-  count = var.is_green_active ? 0 : 1
+  count = var.is_green_active ? 1 : 1
   ami                                  = var.blue_ami_id
   associate_public_ip_address          = true
   availability_zone                    = "eu-central-1a"

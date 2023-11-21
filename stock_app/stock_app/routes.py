@@ -141,7 +141,7 @@ def display_chart(symbol):
         return jsonify({"message": f"Error: {str(e)}"}), 500
 
 
-@routes_bp.route('/stock/<symbol>')
+@routes_bp.route('/test')
 def stock_detail():
     return render_template('test.html')
 
