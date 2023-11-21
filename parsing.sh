@@ -9,3 +9,4 @@ AMI_ID=$(jq -r '.builds[0].artifact_id' manifest.json | cut -d: -f2)
 # Export the AMI ID as an environment variable
 echo "green_ami_id = \"${AMI_ID}\"" >> terraform.auto.tfvars
 echo "blue_ami_id = \"${AMI_BLUE_ID}\"" >> terraform.auto.tfvars
+echo "green_ami_id = \"${AMI_ID}\"" >> terraform.tfvars
