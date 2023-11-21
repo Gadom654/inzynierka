@@ -60,9 +60,9 @@ jobs:
       - run:
           name: update blue ami
           command: |
-            export TF_VAR_old_blue_ami_id="$TF_VAR_blue_ami_id"
-            export TF_VAR_blue_ami_id="$TF_VAR_green_ami_id"
-            export TF_VAR_active_deployment="blue"
+            sed -i 's/blue_ami_id/old_blue_ami_id/g' terraform.auto.tfvars
+            sed -i 's/green_ami_id/blue_ami_id/g' filename
+            echo "active_deployment="blue"" >> terraform.auto.tfvars
             terraform apply -auto-approve
       - persist_to_workspace:
           root: .
@@ -78,9 +78,8 @@ jobs:
       - run:
           name: remove green ami
           command: |
-            export TF_VAR_is_green_active=false
+            echo "is_green_active=false" >> terraform.auto.tfvars
             terraform apply -auto-approve
-            aws ec2 deregister-image --image-id $TF_VAR_old_blue_ami_id
 
 workflows:
   version: 2
