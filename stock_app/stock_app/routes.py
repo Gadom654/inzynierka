@@ -142,7 +142,7 @@ def display_chart(symbol):
 
 
 @routes_bp.route('/test')
-def stock_detail():
+def test():
     return render_template('test.html')
 
 @routes_bp.route('/stock/<symbol>')
