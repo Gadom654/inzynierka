@@ -19,7 +19,7 @@ jobs:
           paths:
             - .
 
-  test_traffic:
+  test:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
