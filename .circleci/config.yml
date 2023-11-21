@@ -11,6 +11,9 @@ jobs:
           name: Terraform Apply Green ec2 and switch traffic
           command: |
             terraform init -input=false
+            wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+            sudo apt install packer
             packer build app-ami.json
             source parsing.sh
             terraform apply -auto-approve
@@ -19,7 +22,22 @@ jobs:
           paths:
             - .
 
-  test:
+  test1:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: test traffic
+          command: |
+            curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  test2:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
@@ -73,19 +91,27 @@ workflows:
           filters:
             branches:
               only: main
-      - test:
+      - test1:
+          requires:
+            - apply
           filters:
             branches:
               only: main
       - switch:
+          requires:
+            - test1
           filters:
             branches:
               only: main
-      - test:
+      - test2:
+          requires:
+            - switch
           filters:
             branches:
               only: main
       - remove:
+          requires:
+            - test2
           filters:
             branches:
               only: main
