@@ -63,6 +63,7 @@ jobs:
             sed -i 's/blue_ami_id/old_blue_ami_id/g' terraform.auto.tfvars
             sed -i 's/green_ami_id/blue_ami_id/g' filename
             echo "active_deployment="blue"" >> terraform.auto.tfvars
+            terraform init
             terraform apply -auto-approve
       - persist_to_workspace:
           root: .
@@ -79,6 +80,7 @@ jobs:
           name: remove green ami
           command: |
             echo "is_green_active=false" >> terraform.auto.tfvars
+            terraform init
             terraform apply -auto-approve
 
 workflows:
