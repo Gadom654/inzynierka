@@ -32,7 +32,8 @@ jobs:
             sudo apt-get install terraform
             terraform init -input=false
             sudo apt-get update && sudo apt-get install packer
-            packer build app-ami.json
+            packer init .
+            packer build app-ami.hcl
             sudo apt install -y jq
             source parsing.sh
             terraform apply -auto-approve
@@ -51,7 +52,7 @@ jobs:
           name: test traffic
           command: |
             set -e  # Ensure the script exits on first command failure
-            if ! curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test; then
+            if ! curl http://example-elb-497548929.eu-central-1.elb.amazonaws.com/test; then
               echo "Test failed, executing failure steps..."
               echo "is_green_active=false" >> terraform.auto.tfvars
               echo "active_deployment=\"blue\"" >> terraform.auto.tfvars
@@ -71,7 +72,7 @@ jobs:
           name: test traffic
           command: |
             set -e  # Ensure the script exits on first command failure
-            if ! curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test; then
+            if ! curl http://example-elb-497548929.eu-central-1.elb.amazonaws.com/test; then
               echo "Test failed, executing failure steps..."
               echo "is_green_active=false" >> terraform.auto.tfvars
               echo "active_deployment=\"blue\"" >> terraform.auto.tfvars
