@@ -33,7 +33,7 @@ jobs:
             terraform init -input=false
             sudo apt-get update && sudo apt-get install packer
             packer init .
-            packer build app-ami.hcl
+            packer build app-ami.pkr.hcl
             sudo apt install -y jq
             source parsing.sh
             terraform apply -auto-approve
