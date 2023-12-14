@@ -1,5 +1,13 @@
 version: 2.1
 
+parameters:
+  remove_test_1_failed:
+    type: boolean
+    default: false
+  remove_test_2_failed:
+    type: boolean
+    default: false
+
 jobs:
   apply:
     working_directory: /tmp/project
@@ -35,21 +43,43 @@ jobs:
 
   test1:
     docker:
-      - image: cimg/base:2023.11
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: test traffic
           command: |
-            curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test
+            set -e  # Ensure the script exits on first command failure
+            if ! curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test; then
+              echo "Test failed, executing failure steps..."
+              echo "is_green_active=false" >> terraform.auto.tfvars
+              echo "active_deployment=\"blue\"" >> terraform.auto.tfvars
+              terraform init
+              terraform apply -auto-approve
+              echo "Exiting pipeline due to test failure"
+              exit 1  # Exit the script with a failure status
+            fi
 
   test2:
     docker:
-      - image: cimg/base:2023.11
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: test traffic
           command: |
-            curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test
+            set -e  # Ensure the script exits on first command failure
+            if ! curl http://example-elb-2021166317.eu-central-1.elb.amazonaws.com/test; then
+              echo "Test failed, executing failure steps..."
+              echo "is_green_active=false" >> terraform.auto.tfvars
+              echo "active_deployment=\"blue\"" >> terraform.auto.tfvars
+              terraform init
+              terraform apply -auto-approve
+              echo "Exiting pipeline due to test failure"
+              exit 1  # Exit the script with a failure status
+            fi
 
   switch:
     docker:
