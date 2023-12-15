@@ -10,7 +10,6 @@
     <table class="table w-100 table-bordered">
         <thead>
             <tr>
-                <th>Name</th>
                 <th>Symbol</th>
                 <th>Current Price</th>
                 <th>P/E Ratio</th>
@@ -21,7 +20,6 @@
             {% for company in companies %}
             <tr>
                 <td><a href="/stock/{{ company.symbol }}">{{ company.symbol }}</a></td>
-                <td><a href="/stock/{{ company.symbol }}">{{ company.name }}</a></td>
                 <td>${{ company.current_price }}</td>
                 <td>{{ company.pe_ratio }}</td>
                 <td>{{ company.market_cap }}</td>
