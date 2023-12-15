@@ -21,29 +21,21 @@ class DataFetcher:
     @staticmethod
     def fetch_additional_info(symbol):
         try:
-            api_key="19859RY0D58DN3BY"
-            # Define the API endpoint
-            url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
+            # Pobierz dane dla podanego symbolu za pomocą yfinance
+            ticker = yf.Ticker(symbol)
+            data = ticker.info
 
-            # Make the API request
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
+            # Wyodrębnij potrzebne informacje
+            stock_name = data.get("longName")
+            pe_ratio = Decimal(str(data.get("trailingPE"))) if data.get("trailingPE") is not None else None
+            market_cap = data.get("marketCap")
 
-                # Extract the desired information
-                stock_name = data.get("Name")
-                pe_ratio = Decimal(str(data.get("PERatio"))) if data.get("PERatio") is not None else None
-                market_cap = data.get("MarketCapitalization")
+            if market_cap is not None:
+                # Przekształć market_cap na wartość w milionach
+                market_cap = Decimal(market_cap) / Decimal(1e6)
+                market_cap = market_cap.quantize(Decimal('0.01'))
 
-                if market_cap is not None and market_cap != 'None':
-                    # Ensure that market_cap is a string representing a number
-                    market_cap = Decimal(market_cap) / Decimal(1e6)
-                    market_cap = market_cap.quantize(Decimal('0.01'))
-
-                return stock_name, pe_ratio, market_cap
-            else:
-                print(f"Failed to fetch data for {symbol}, status code: {response.status_code}")
-                return None, None, None
+            return stock_name, pe_ratio, market_cap
         except Exception as e:
             print(f"Error fetching additional info for {symbol}: {str(e)}")
             return None, None, None
