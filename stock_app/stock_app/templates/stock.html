@@ -40,58 +40,46 @@
         </tr>
     </table>
 
-    <!-- Large chart -->
-    <canvas id="largeChart" width="600" height="300"></canvas>
-
-    <!-- Small chart -->
-    <canvas id="smallChart" width="300" height="150"></canvas>
-
-
-    <!-- Single chart container with dynamic height -->
-    <div id="chartContainer">
-        <canvas id="stockChart" width="600" height="300"></canvas>
-    </div>
+    <canvas id="stockChart" width="400" height="200"></canvas>
 
     <script>
         // JavaScript code to create the chart using the provided chart_data
         var ctx = document.getElementById('stockChart').getContext('2d');
         var chartData = {{ chart_data|tojson|safe }};
 
-        if (chartData.length > 0) {
-            // Create the chart only if chartData is not empty
-            var chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartData.map(item => item.date),
-                    datasets: [{
-                        label: 'Close Price',
-                        data: chartData.map(item => item.close_price),
-                        borderColor: 'blue',
-                        borderWidth: 1,
-                    }]
+        // Example: Create a line chart using Chart.js
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.map(item => item.date),
+                datasets: [{
+                    label: 'Close Price',
+                    data: chartData.map(item => item.close_price),
+                    borderColor: 'blue',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                scales: {
+                    x: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date',
+                        },
+                    }],
+                    y: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Close Price',
+                        },
+                    }],
                 },
-                options: {
-                    scales: {
-                        x: [{
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date',
-                            },
-                        }],
-                        y: [{
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Close Price',
-                            },
-                        }],
-                    },
-                },
-            });
-        }
+            },
+        });
     </script>
 {% endblock %}
 </body>
